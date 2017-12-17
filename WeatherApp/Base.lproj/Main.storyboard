@@ -46,8 +46,8 @@
                                 <rect key="frame" x="0.0" y="69" width="375" height="554"/>
                                 <color key="backgroundColor" red="0.80754412180000001" green="0.88416811159999997" blue="0.99376619170000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <color key="separatorColor" red="0.80754412180000001" green="0.88416811159999997" blue="0.99376619170000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                <color key="sectionIndexColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                                <color key="sectionIndexBackgroundColor" red="0.80754412180000001" green="0.88416811159999997" blue="0.99376619170000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <color key="sectionIndexColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <color key="sectionIndexBackgroundColor" red="0.3472163942" green="0.54259514360000005" blue="0.98028659330000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <prototypes>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="cityCell" id="UMY-qv-Yf1">
                                         <rect key="frame" x="0.0" y="28" width="375" height="44"/>
@@ -84,6 +84,7 @@
                     <toolbarItems/>
                     <simulatedToolbarMetrics key="simulatedBottomBarMetrics"/>
                     <connections>
+                        <outlet property="segmentControll" destination="JUb-ET-0Na" id="EB2-ed-XIo"/>
                         <outlet property="tableView" destination="3DX-K2-noS" id="ztg-c1-Zi3"/>
                         <segue destination="ZiD-kC-R3i" kind="show" identifier="ViewControllerSeague" id="hE2-9W-NJM"/>
                     </connections>
@@ -95,7 +96,7 @@
         <!--Title-->
         <scene sceneID="NCf-cR-p4r">
             <objects>
-                <viewController id="ZiD-kC-R3i" customClass="ViewController" customModule="WeatherApp" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="detailViewStoryBoard" useStoryboardIdentifierAsRestorationIdentifier="YES" id="ZiD-kC-R3i" customClass="ViewController" customModule="WeatherApp" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="MV6-jb-D4I">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -107,11 +108,11 @@
                                 <fontDescription key="fontDescription" type="system" pointSize="20"/>
                                 <textInputTraits key="textInputTraits"/>
                             </textField>
-                            <textField contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" text="35" textAlignment="center" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="l0p-fS-Xxp">
-                                <rect key="frame" x="255" y="134" width="29" height="24"/>
+                            <textField contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="left" contentVerticalAlignment="bottom" text="35" textAlignment="center" minimumFontSize="25" translatesAutoresizingMaskIntoConstraints="NO" id="l0p-fS-Xxp">
+                                <rect key="frame" x="210" y="134" width="74" height="24"/>
                                 <color key="backgroundColor" red="0.80754412180000001" green="0.88416811159999997" blue="0.99376619170000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="20"/>
+                                <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="25"/>
                                 <textInputTraits key="textInputTraits"/>
                             </textField>
                             <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" text="San Jose" textAlignment="center" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="q2Z-7H-1Qq">
@@ -119,7 +120,7 @@
                                 <color key="backgroundColor" red="0.80754412180000001" green="0.88416811159999997" blue="0.99376619170000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="39"/>
-                                <textInputTraits key="textInputTraits"/>
+                                <textInputTraits key="textInputTraits" autocapitalizationType="words"/>
                             </textField>
                             <button opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="klu-T1-tEX">
                                 <rect key="frame" x="16" y="20" width="46" height="30"/>
@@ -143,25 +144,25 @@
                                             <subviews>
                                                 <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="CwF-rf-OCO">
                                                     <rect key="frame" x="142" y="0.0" width="60" height="43"/>
-                                                    <color key="backgroundColor" red="0.80754412180000001" green="0.88416811159999997" blue="0.99376619170000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                    <color key="backgroundColor" red="0.3472163942" green="0.54259514360000005" blue="0.98028659330000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                 </imageView>
                                                 <textField opaque="NO" userInteractionEnabled="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" text="30" textAlignment="center" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="ibt-vO-wta">
                                                     <rect key="frame" x="269" y="7" width="27" height="30"/>
-                                                    <color key="backgroundColor" red="0.80754412180000001" green="0.88416811159999997" blue="0.99376619170000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                    <color key="backgroundColor" red="0.3472163942" green="0.54259514360000005" blue="0.98028659330000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                     <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="19"/>
                                                     <textInputTraits key="textInputTraits"/>
                                                 </textField>
                                                 <textField opaque="NO" userInteractionEnabled="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" text="20" textAlignment="center" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="kCN-U6-LuE">
                                                     <rect key="frame" x="304" y="6" width="24" height="30"/>
-                                                    <color key="backgroundColor" red="0.80754412180000001" green="0.88416811159999997" blue="0.99376619170000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                    <color key="backgroundColor" red="0.3472163942" green="0.54259514360000005" blue="0.98028659330000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                     <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="16"/>
                                                     <textInputTraits key="textInputTraits"/>
                                                 </textField>
                                                 <textField opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" text="Day" textAlignment="center" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="E96-Uf-bN5">
                                                     <rect key="frame" x="22" y="11" width="37" height="23"/>
-                                                    <color key="backgroundColor" red="0.80754412180000001" green="0.88416811159999997" blue="0.99376619170000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                    <color key="backgroundColor" red="0.3472163942" green="0.54259514360000005" blue="0.98028659330000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                     <accessibility key="accessibilityConfiguration">
                                                         <accessibilityTraits key="traits" notEnabled="YES"/>
                                                     </accessibility>
@@ -170,7 +171,7 @@
                                                     <textInputTraits key="textInputTraits"/>
                                                 </textField>
                                             </subviews>
-                                            <color key="backgroundColor" red="0.80754412180000001" green="0.88416811159999997" blue="0.99376619170000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                            <color key="backgroundColor" red="0.3472163942" green="0.54259514360000005" blue="0.98028659330000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                             <constraints>
                                                 <constraint firstItem="ibt-vO-wta" firstAttribute="centerY" secondItem="eQn-fN-ev1" secondAttribute="centerY" id="3D4-5f-Vom"/>
                                                 <constraint firstItem="CwF-rf-OCO" firstAttribute="centerX" secondItem="eQn-fN-ev1" secondAttribute="centerX" id="FTl-ve-RMJ"/>
@@ -207,16 +208,16 @@
                                 <fontDescription key="fontDescription" type="system" pointSize="20"/>
                                 <textInputTraits key="textInputTraits"/>
                             </textField>
-                            <textField contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" text="Partly cloudy" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="wqE-KI-qWi">
+                            <textField contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" text="Partly cloudy" minimumFontSize="20" translatesAutoresizingMaskIntoConstraints="NO" id="wqE-KI-qWi">
                                 <rect key="frame" x="16" y="134" width="116" height="24"/>
                                 <color key="backgroundColor" red="0.80754412180000001" green="0.88416811159999997" blue="0.99376619170000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="20"/>
-                                <textInputTraits key="textInputTraits"/>
+                                <textInputTraits key="textInputTraits" autocapitalizationType="words"/>
                             </textField>
                             <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="left" showsHorizontalScrollIndicator="NO" showsVerticalScrollIndicator="NO" dataMode="prototypes" prefetchingEnabled="NO" translatesAutoresizingMaskIntoConstraints="NO" id="3h0-D5-DZT">
                                 <rect key="frame" x="16" y="180" width="343" height="160"/>
-                                <color key="backgroundColor" red="0.80754412180000001" green="0.88416811159999997" blue="0.99376619170000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="160" id="Jqe-NC-fDg"/>
                                 </constraints>
@@ -235,25 +236,25 @@
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <textField opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" text="10 PM" textAlignment="center" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="SOR-Vi-uf4">
-                                                    <rect key="frame" x="0.0" y="12" width="89" height="28"/>
-                                                    <color key="backgroundColor" red="0.80754412180000001" green="0.88416811159999997" blue="0.99376619170000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                    <rect key="frame" x="0.0" y="13" width="89" height="17"/>
+                                                    <color key="backgroundColor" red="0.3472163942" green="0.54259514360000005" blue="0.98028659330000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                     <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                                                    <fontDescription key="fontDescription" type="system" pointSize="16"/>
+                                                    <fontDescription key="fontDescription" type="system" pointSize="20"/>
                                                     <textInputTraits key="textInputTraits"/>
                                                 </textField>
                                                 <imageView userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Shh-ec-SBQ">
                                                     <rect key="frame" x="0.0" y="38" width="89" height="84"/>
                                                 </imageView>
                                                 <textField opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" text="36.2" textAlignment="center" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="36o-RI-qMB">
-                                                    <rect key="frame" x="0.0" y="119" width="89" height="21"/>
-                                                    <color key="backgroundColor" red="0.80754412180000001" green="0.88416811159999997" blue="0.99376619170000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                    <rect key="frame" x="0.0" y="119" width="89" height="29"/>
+                                                    <color key="backgroundColor" red="0.3472163942" green="0.54259514360000005" blue="0.98028659330000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                     <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                                                    <fontDescription key="fontDescription" type="system" pointSize="15"/>
+                                                    <fontDescription key="fontDescription" type="system" pointSize="20"/>
                                                     <textInputTraits key="textInputTraits"/>
                                                 </textField>
                                             </subviews>
                                         </view>
-                                        <color key="backgroundColor" red="0.80754412180000001" green="0.88416811159999997" blue="0.99376619170000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                        <color key="backgroundColor" red="0.3472163942" green="0.54259514360000005" blue="0.98028659330000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                         <constraints>
                                             <constraint firstItem="SOR-Vi-uf4" firstAttribute="top" secondItem="XmH-BV-Y2G" secondAttribute="top" id="66a-qB-Jf2"/>
                                             <constraint firstItem="SOR-Vi-uf4" firstAttribute="leading" secondItem="XmH-BV-Y2G" secondAttribute="leading" id="GLR-h8-H5B"/>
@@ -307,7 +308,11 @@
                     </view>
                     <navigationItem key="navigationItem" title="Title" id="ztK-MN-PC9"/>
                     <connections>
+                        <outlet property="cityMax" destination="l0p-fS-Xxp" id="v8T-xE-VEY"/>
+                        <outlet property="cityMin" destination="Lfk-C0-Avr" id="22G-Vw-fVQ"/>
                         <outlet property="cityName" destination="q2Z-7H-1Qq" id="dj9-uN-Rpp"/>
+                        <outlet property="cityWeather" destination="wqE-KI-qWi" id="xwk-xo-rKB"/>
+                        <outlet property="todayDay" destination="uyB-7y-DmP" id="VTh-ra-DKU"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="wPS-dp-X3D" userLabel="First Responder" sceneMemberID="firstResponder"/>

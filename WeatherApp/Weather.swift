@@ -9,17 +9,11 @@
 import Foundation
 
 // To store a city weather and location data.
-class Weather{
-    
+struct City {
     var placeName: String = ""
     var lat: String = ""
     var lon: String = ""
     var countryISO: String = ""
     var timezone: String = ""
-    var minTemp: String = ""
-    var maxTemp: String = ""
     
-    func fetchWeather(_ city:String){
-        
-    }
 }

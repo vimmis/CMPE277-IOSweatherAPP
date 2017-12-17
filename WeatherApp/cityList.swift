@@ -11,20 +11,31 @@ import GooglePlaces
 
 class CityList: UIViewController , UITableViewDelegate, UITableViewDataSource{
     
-    var  cities = ["San Jose","London","Mumbai"]
+    //var  cities = ["San Jose","London","Mumbai"]
     var newCity: String = ""
-    var temp: Bool = false // False = C, True= F
+    static var  temp: Bool = false // False = C, True= F
     var citySelected : String = ""
+    var cityWeather : String = ""
+    var cityMax : String = ""
+    var cityMin : String = ""
+    //static var segmentControll : UISegmentedControl? = nil
     
+    @IBOutlet weak var segmentControll: UISegmentedControl!
     @IBOutlet weak var tableView: UITableView!
     
     @IBAction func segmentedTemp(_ sender: UISegmentedControl) {
-        
+        //CityList.segmentControll = sender
         let selectedPreference  = sender.titleForSegment(at: sender.selectedSegmentIndex)!
         if(selectedPreference == "C"){
-           temp = false
+            CityList.temp = false
+            let subViewOfSegment: UIView = segmentControll.subviews[0] as UIView
+            subViewOfSegment.tintColor = UIColor.blue
+
         }else{
-            temp = true
+            CityList.temp = true
+            let subViewOfSegment: UIView = segmentControll.subviews[1] as UIView
+            subViewOfSegment.tintColor = UIColor.blue
+
         }
         // post temp changes, temp calculations may require and end reload data
         tableView.reloadData()
@@ -32,7 +43,13 @@ class CityList: UIViewController , UITableViewDelegate, UITableViewDataSource{
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        // Sustain segmented stemperature selections.
+        if CityList.temp{
+            segmentControll.selectedSegmentIndex = 1
+        }else{
+            segmentControll.selectedSegmentIndex = 0
+        }
+        segmentControll.sendActions(for: UIControlEvents.valueChanged)
         // Do any additional setup after loading the view.
     }
 
@@ -48,7 +65,7 @@ class CityList: UIViewController , UITableViewDelegate, UITableViewDataSource{
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // #warning Incomplete implementation, return the number of rows
-        return   cities.count
+        return   Cities.cities.count
     }
     
     
@@ -60,7 +77,7 @@ class CityList: UIViewController , UITableViewDelegate, UITableViewDataSource{
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "cityCell", for: indexPath) 
-        cell.textLabel!.text = cities[indexPath.row]
+        cell.textLabel!.text = Cities.cities[indexPath.row]
         return cell
     }
     
@@ -68,17 +85,13 @@ class CityList: UIViewController , UITableViewDelegate, UITableViewDataSource{
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
             // Delete the row from the data source
-            NSLog("Deleting at :")
-            cities.remove(at: indexPath.row)
-            NSLog("Post deletion of city")
-            NSLog(cities.description)
+
+            let place = Cities.cities[indexPath.row]
+            Cities.cities.remove(at: indexPath.row)
+            Cities.cityObjectsMap.removeValue(forKey: place)
             tableView.deleteRows(at: [indexPath], with: .fade)
-            //cities.remove(at: indexPath.row)
             
-            //self.tableView.reloadData()
-        } //else if editingStyle == .insert {
-        // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
-        // }
+        }
     }
     
     func tableView(_ tableView: UITableView, canMoveRowAt indexPath: IndexPath) -> Bool {
@@ -96,6 +109,17 @@ class CityList: UIViewController , UITableViewDelegate, UITableViewDataSource{
         citySelected = currentCell.textLabel!.text!
         NSLog("City Selected")
         NSLog(citySelected)
+        let cityobject = Cities.cityObjectsMap[citySelected]
+        print("Selected city object :" + cityobject.debugDescription)
+        Cities.getToday((cityobject?.lat)!,(cityobject?.lon)!)
+        while (Cities.jsonToday == nil){
+            //do nothing
+        }
+        
+        Cities.getHourly((cityobject?.lat)!,(cityobject?.lon)!)
+        while (Cities.jsonHourly == nil){
+            //do nothing
+        }
         super.performSegue(withIdentifier: "ViewControllerSeague", sender: self)
     }
     
@@ -103,15 +127,7 @@ class CityList: UIViewController , UITableViewDelegate, UITableViewDataSource{
          NSLog("Inside prepareseagyue")
         
         if (segue.identifier == "ViewControllerSeague") {
-             NSLog("Inside prepareseagyue2")
-            // initialize new view controller and cast it as your view controller
-            let viewController = segue.destination as! ViewController
-            // your new view controller should have property that will store passed value
-            NSLog("Inside prepareseagyue3")
-            
-            viewController.passedValue = citySelected
-            NSLog("after prepareseagyue")
-            NSLog(viewController.passedValue)
+            ViewController.passedValue = citySelected
         }
     }
     
@@ -124,17 +140,21 @@ class CityList: UIViewController , UITableViewDelegate, UITableViewDataSource{
         
     }
 
-    
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destinationViewController.
-        // Pass the selected object to the new view controller.
+    class  func toastView(messsage : String, view: UIView ){
+        let toastLabel = UILabel(frame: CGRect(x: view.frame.size.width/2 - 150, y: view.frame.size.height-100, width: 300,  height : 35))
+        toastLabel.backgroundColor = UIColor.white
+        toastLabel.textColor = UIColor.black
+        toastLabel.textAlignment = NSTextAlignment.center;
+        view.addSubview(toastLabel)
+        toastLabel.text = messsage
+        toastLabel.alpha = 1.0
+        toastLabel.layer.cornerRadius = 10;
+        toastLabel.clipsToBounds  =  true
+        UIView.animate(withDuration: 4.0, delay: 0.1, options: UIViewAnimationOptions.curveEaseOut, animations: {
+            toastLabel.alpha = 0.0
+            
+        })
     }
-    */
-
 }
 
 extension CityList: GMSAutocompleteViewControllerDelegate {
@@ -143,13 +163,37 @@ extension CityList: GMSAutocompleteViewControllerDelegate {
     // Handle the user's selection.
     func viewController(_ viewController: GMSAutocompleteViewController, didAutocompleteWith place: GMSPlace) {
         print(place.name)
-        print(place.formattedAddress)
-        print(place.attributions)
-        var lat = place.coordinate.latitude
-        var lon = place.coordinate.longitude
-        print("lat lon",lat,lon)
-
-        dismiss(animated: true, completion: nil)
+        if !Cities.cities.contains(place.name){
+            Cities.cities.append(place.name)
+            print (Cities.cities.joined(separator:","))
+            let lat = place.coordinate.latitude
+            let lon = place.coordinate.longitude
+            print("lat lon",lat,lon)
+            if Cities.cityObjectsMap.index(forKey: place.name) == nil
+            {
+                let cityObject = City (placeName : place.name, lat: String(format:"%f", lat), lon : String(format:"%f", lon), countryISO: "", timezone: "")
+                Cities.cityObjectsMap[place.name] = cityObject
+            }
+            
+            Cities.getTimezone(String(format:"%f", lat),String(format:"%f", lon), place.name)
+            sleep(1)
+            let city = Cities.cityObjectsMap[place.name]
+            print("Selected city object : \(String(describing: city))")
+            Cities.getToday((city?.lat)!,(city?.lon)!)
+            while (Cities.jsonToday == nil){
+                //do nothing
+            }
+            Cities.getHourly((city?.lat)!,(city?.lon)!)
+            while (Cities.jsonHourly == nil){
+                //do nothing
+            }
+            // Load data for next city going to be viewed
+            dismiss(animated: true, completion: nil)
+            tableView.reloadData()
+        }else{
+            CityList.toastView(messsage:"City already exist", view: self.view)
+        }
+        
     }
     
     func viewController(_ viewController: GMSAutocompleteViewController, didFailAutocompleteWithError error: Error) {
@@ -171,3 +215,5 @@ extension CityList: GMSAutocompleteViewControllerDelegate {
         UIApplication.shared.isNetworkActivityIndicatorVisible = false
     }
 }
+
+
