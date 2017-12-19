@@ -48,6 +48,7 @@
 		BD57E63E3EE4F157E9A6390E /* Pods-WeatherAppTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WeatherAppTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-WeatherAppTests/Pods-WeatherAppTests.debug.xcconfig"; sourceTree = "<group>"; };
 		F002FEA31FCAAE7B009BA450 /* DayCollectionCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DayCollectionCell.swift; sourceTree = "<group>"; };
 		F002FEA51FCAB8D6009BA450 /* FourDaysTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FourDaysTableViewCell.swift; sourceTree = "<group>"; };
+		F006A3521FE8DA4900F43C15 /* CoreLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = System/Library/Frameworks/CoreLocation.framework; sourceTree = SDKROOT; };
 		F02E66701FC8C93C00BCBADC /* WeatherApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WeatherApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F02E66731FC8C93C00BCBADC /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		F02E66751FC8C93C00BCBADC /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -97,6 +98,7 @@
 		39A95C93FD44B17924DC709B /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				F006A3521FE8DA4900F43C15 /* CoreLocation.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";

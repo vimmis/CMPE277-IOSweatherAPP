@@ -8,23 +8,23 @@
 
 import UIKit
 import GooglePlaces
-
+// This class takes care of managing list of cities for viewing, adding, deleting and tapping.
 class CityList: UIViewController , UITableViewDelegate, UITableViewDataSource{
     
-    //var  cities = ["San Jose","London","Mumbai"]
     var newCity: String = ""
     static var  temp: Bool = false // False = C, True= F
     var citySelected : String = ""
     var cityWeather : String = ""
     var cityMax : String = ""
     var cityMin : String = ""
-    //static var segmentControll : UISegmentedControl? = nil
+
     static var alertmsg : String? = nil
     @IBOutlet weak var segmentControll: UISegmentedControl!
     @IBOutlet weak var tableView: UITableView!
     
+    //Based on user C/F preference, we store it for other view to accordignly manupulate temp
     @IBAction func segmentedTemp(_ sender: UISegmentedControl) {
-        //CityList.segmentControll = sender
+
         let selectedPreference  = sender.titleForSegment(at: sender.selectedSegmentIndex)!
         if(selectedPreference == "C"){
             CityList.temp = false
@@ -41,6 +41,7 @@ class CityList: UIViewController , UITableViewDelegate, UITableViewDataSource{
         tableView.reloadData()
     }
     
+    // To maintain  user preference on each view load
     override func viewDidLoad() {
         
         super.viewDidLoad()
@@ -53,9 +54,9 @@ class CityList: UIViewController , UITableViewDelegate, UITableViewDataSource{
             segmentControll.selectedSegmentIndex = 0
         }
         segmentControll.sendActions(for: UIControlEvents.valueChanged)
-        // Do any additional setup after loading the view.
-    }
 
+    }
+    // Show pop up message incase of any error caught
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         if CityList.alertmsg != nil{
@@ -67,8 +68,7 @@ class CityList: UIViewController , UITableViewDelegate, UITableViewDataSource{
             }
             CityList.alertmsg = nil;
         }
-        
-        
+ 
     }
     
     override func didReceiveMemoryWarning() {
@@ -92,17 +92,35 @@ class CityList: UIViewController , UITableViewDelegate, UITableViewDataSource{
         // Return false if you do not want the specified item to be editable.
         return true
     }
-    
+    // Manages data for each cell of table view with current time, city name and temp
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "cityCell", for: indexPath) 
-        cell.textLabel!.text = Cities.cities[indexPath.row]
+
+        let cell = tableView.dequeueReusableCell(withIdentifier: "cityCell", for: indexPath)
+        let CityInfo = Cities.cities[indexPath.row]
+        let cityobject = Cities.cityObjectsMap[CityInfo]
+        Cities.jsonToday = nil
+        Cities.getToday((cityobject?.lat)!,(cityobject?.lon)!)
+        while (Cities.jsonToday == nil){
+            //do nothing
+        }
+        let jsonWeatherToday = Cities.jsonToday
+        var weather = ""
+        if CityList.temp {
+            weather = Cities.getF(jsonWeatherToday!["main"]["temp"].stringValue)
+        }else{
+            weather = String(format: "%.1f", jsonWeatherToday!["main"]["temp"].double!)
+        }
+        let currentTime = Cities.CityCurrentTime(CityInfo)
+        cell.textLabel!.numberOfLines = 0
+        cell.textLabel!.text = currentTime + "\n" + CityInfo + "\n" + "AvgTemp: " + weather
+
         return cell
     }
     
     // Override to support editing the table view.
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
-            // Delete the row from the data source
+            // Delete the row from the data source from corresponding stored objects
 
             let place = Cities.cities[indexPath.row]
             Cities.cities.remove(at: indexPath.row)
@@ -117,6 +135,7 @@ class CityList: UIViewController , UITableViewDelegate, UITableViewDataSource{
     return false
     }
     
+    // Manages selection of city on tap on it and load its corresponding weather data before it shows in next view
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         print("You selected cell #\(indexPath.row)!")
         
@@ -124,7 +143,7 @@ class CityList: UIViewController , UITableViewDelegate, UITableViewDataSource{
         let indexPath = tableView.indexPathForSelectedRow!
         let currentCell = tableView.cellForRow(at: indexPath)! as UITableViewCell
         
-        citySelected = currentCell.textLabel!.text!
+        citySelected = Cities.cities[indexPath.row]
         NSLog("City Selected")
         NSLog(citySelected)
         let cityobject = Cities.cityObjectsMap[citySelected]
@@ -149,6 +168,7 @@ class CityList: UIViewController , UITableViewDelegate, UITableViewDataSource{
         }
     }
     
+    // For launching google place API view
     @IBAction func addCityGooglePlaces(_ sender: UIButton) {
         
         NSLog("Im clicked")
@@ -158,27 +178,12 @@ class CityList: UIViewController , UITableViewDelegate, UITableViewDataSource{
         
     }
 
-    class  func toastView(messsage : String, view: UIView ){
-        let toastLabel = UILabel(frame: CGRect(x: view.frame.size.width/2 - 150, y: view.frame.size.height-100, width: 300,  height : 35))
-        toastLabel.backgroundColor = UIColor.white
-        toastLabel.textColor = UIColor.black
-        toastLabel.textAlignment = NSTextAlignment.center;
-        view.addSubview(toastLabel)
-        toastLabel.text = messsage
-        toastLabel.alpha = 1.0
-        toastLabel.layer.cornerRadius = 10;
-        toastLabel.clipsToBounds  =  true
-        UIView.animate(withDuration: 4.0, delay: 0.1, options: UIViewAnimationOptions.curveEaseOut, animations: {
-            toastLabel.alpha = 0.0
-            
-        })
-    }
 }
-
+// Delegate to handle google places API related functionalities
 extension CityList: GMSAutocompleteViewControllerDelegate {
 
     
-    // Handle the user's selection.
+    // Handle the user's selection, validate and respond if valid city and valid data from weather API recieved
     func viewController(_ viewController: GMSAutocompleteViewController, didAutocompleteWith place: GMSPlace) {
         print(place.name)
         if !Cities.cities.contains(place.name){
@@ -225,7 +230,7 @@ extension CityList: GMSAutocompleteViewControllerDelegate {
             dismiss(animated: true, completion: nil)
             tableView.reloadData()
         }else{
-            //CityList.toastView(messsage:"City already exist", view: self.view)
+
             print ("Duplicate city")
             CityList.alertmsg = "City already exist, not adding"
             dismiss(animated: true, completion: nil)

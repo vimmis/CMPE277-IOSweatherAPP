@@ -8,7 +8,7 @@
 
 import Foundation
 
-
+// For storing independent functionalities and data objects accessible for complete application(static)
 class Cities {
     static let dyaskey = ["Monday": "Tuesday", "Tuesday": "Wednesday", "Wednesday": "Thursday","Thursday": "Friday", "Friday":"Saturday", "Saturday":"Sunday","Sunday":"Monday"]
     static var cities:[String] = []
@@ -19,6 +19,7 @@ class Cities {
     static let weatherAPIHourly = "http://api.openweathermap.org/data/2.5/forecast?appid=4d24bc6be2371dad87666ac843e640ad&units=metric"
     static let timeZoneAPI = "http://api.timezonedb.com/v2/get-time-zone?key=MRKZ336VAE4Y&format=json&by=position"
     
+    // Fetches Today weather for a city
     static func getToday(_ lat:String,_ long:String){
         let urlString = weatherAPIToday + "&lat=" + lat + "&lon=" + long
         print("Calling today api:" + urlString)
@@ -50,7 +51,7 @@ class Cities {
             //do nothing
         }
     }
-    
+    // Fetches 5days 3 hours weather for a city
     static func getHourly(_ lat:String,_ long:String){
         let urlString = weatherAPIHourly + "&lat=" + lat + "&lon=" + long
         print("Calling hourly api:" + urlString)
@@ -84,6 +85,7 @@ class Cities {
         
     }
     
+    // Fetches Timezone related data for a city
     static func getTimezone(_ lat:String,_ long:String, _ placename :String){
         
         let urlString = timeZoneAPI + "&lat=" + lat + "&lng=" + long
@@ -128,6 +130,7 @@ class Cities {
         }
     }
     
+    // Fetches Today Day for a city
     static func getDay(_ placename : String) -> String {
         print("Inside get day")
         if Cities.cityObjectsMap.index(forKey: placename) != nil
@@ -154,6 +157,7 @@ class Cities {
         
     }
     
+    // Fetches current utc date and time
     static func getLocaltoUTCNow() -> String {
         //print("Inside getLocaltoUTCNow")
         let dateFormatter = DateFormatter()
@@ -166,22 +170,7 @@ class Cities {
         return nowinUTCString
     }
     
-    /*static func getLocalNow(_ placename : String) -> String {
-        print("Inside getLocalNow")
-        var city :City = Cities.cityObjectsMap[placename]!
-        while (city.timezone == ""){
-            city = Cities.cityObjectsMap[placename]!
-        }
-        
-        let dateFormatter = DateFormatter()
-            
-        dateFormatter.timeZone = NSTimeZone(name: city.timezone)! as TimeZone
-        dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
-        let str = dateFormatter.string(from: NSDate() as Date)
-        print(str)
-        return str
-    }*/
-    
+    // Fetches Fahrenheit equivalent for a given C temp
     static func getF(_ temp : String) -> String {
         print("Inside get Fahrenhiet")
         if var tempd = Double(temp) {
@@ -195,6 +184,7 @@ class Cities {
         
     }
     
+    // Fetches closest Hour match of utc to 3 multiple HR match for Weather json data
     static func getClosest3MultipleHR(_ temp : String) -> Int {
         print("Inside get 3multiple")
         
@@ -218,8 +208,9 @@ class Cities {
         return match
     }
     
+    // Fetches place's tomorrow noon equivalent in UTC
     static func getTmrwNoonToUTCDate(_ placename : String) -> Date {
-            //print("Inside get tmrw noon in utc")
+      
             var city :City = Cities.cityObjectsMap[placename]!
             while (city.timezone == ""){
                 city = Cities.cityObjectsMap[placename]!
@@ -234,30 +225,23 @@ class Cities {
             let nowNoon = calendar.date(bySettingHour: 12, minute: 0, second: 0, of: NSDate() as Date)!
             let tomorrow = calendar.date(byAdding: .day, value: 1, to: nowNoon as Date)
             let str = dateFormatter.string(from: tomorrow! as Date)
-            //print("timezone's tomorow date:" + str)
-            //print("UTC time for tomorow timezone Noon: \(tomorrow)")
-            /*dateFormatter.dateFormat = "yyyy-MM-dd HH:mm"
-            dateFormatter.timeZone = NSTimeZone(name: "UTC")! as TimeZone
-            let timezoneTmrNoonToUtc = dateFormatter.string(from: tomorrow! as Date)
-            print("final timezone's tmrw noon in UTC: " + timezoneTmrNoonToUtc)*/
             return tomorrow!
     }
+    
     //To convert a UTC Date to Date without time
     static func DateWithoutTime(_ datewithT : Date) -> Date {
-        //print("Inside DateWithoutTime")
-        
+
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd"
         dateFormatter.timeZone = NSTimeZone(name: "UTC")! as TimeZone
         let str = dateFormatter.string(from: datewithT as Date)
         var dateFromString : Date = dateFormatter.date(from: str)!
-        //print ("Date to Date without time : \(dateFromString)")
         return dateFromString
     }
+    
     //To convert JSON String date to only UTC Date without time
     static func StringtoDate(_ strDate : String) -> Date {
-        //print("Inside StringtoDate")
-        
+
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
         dateFormatter.timeZone = NSTimeZone(name: "UTC")! as TimeZone
@@ -265,14 +249,12 @@ class Cities {
         dateFormatter.dateFormat = "yyyy-MM-dd"
         let str = dateFormatter.string(from: dateFromString as Date)
         let dateFromStringfinal : Date = dateFormatter.date(from: str)!
-        //print ("Str to Date without time : \(dateFromStringfinal)")
         return dateFromStringfinal
     }
     
     //To convert JSON String date to only UTC Date with time
     static func StringtoDateTime(_ strDate : String) -> Date {
-        //print("Inside StringtoDate")
-        
+
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
         dateFormatter.timeZone = NSTimeZone(name: "UTC")! as TimeZone
@@ -280,9 +262,9 @@ class Cities {
         return dateFromString
     }
     
+    //To fecth hour portion from a string of date
     static func StringtoHR(_ strDate : String) -> Int {
-        //print("Inside StringtoHR")
-        
+
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
         dateFormatter.timeZone = NSTimeZone(name: "UTC")! as TimeZone
@@ -293,30 +275,20 @@ class Cities {
         return Int(strHR)!
     }
     
+    //To convert a UTC date to String
     static func DatetoString(_ date : Date) -> String {
-        //print("Inside DatetoString")
-        
+
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
         dateFormatter.timeZone = NSTimeZone(name: "UTC")! as TimeZone
         let dateWithTime  = dateFormatter.string(from: date as Date)
-        //print ("Date to String: \(dateWithTime)")
         return dateWithTime
     }
     
+    //To fetch whats tomorrow Day for a place
     static func getTmrwTimezoneDAY( _ placename : String) -> String {
         var city :City = Cities.cityObjectsMap[placename]!
-        /*let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
-        dateFormatter.timeZone = TimeZone(abbreviation: "UTC")
-        let tempstr = Cities.DatetoString(utcDate)
-        dateFormatter.timeZone = NSTimeZone(name: city.timezone)! as TimeZone
 
-        let dt = dateFormatter.date(from: tempstr)
-        dateFormatter.dateFormat = "EEEE"
-        
-        print(dateFormatter.string(from: dt!))
-        return dateFormatter.string(from: dt!)*/
         let dateFormatter = DateFormatter()
         dateFormatter.timeZone = NSTimeZone(name: city.timezone)! as TimeZone
         dateFormatter.dateFormat = "EEEE"
@@ -327,6 +299,7 @@ class Cities {
         return tomDay!
     }
     
+    //To fetch place current time's hour value
     static func LocalHR(_ placename : String) -> Int {
         var city :City = Cities.cityObjectsMap[placename]!
         while (city.timezone == ""){
@@ -343,6 +316,34 @@ class Cities {
         let hourList = timeList[1].components(separatedBy: ":")
         return Int(hourList[0])!
     }
+    
+    //To fetch place current time (HH:ss AM/PM)
+    static func CityCurrentTime(_ placename : String) -> String {
+        var city :City = Cities.cityObjectsMap[placename]!
+        while (city.timezone == ""){
+            city = Cities.cityObjectsMap[placename]!
+        }
+        
+        let dateFormatter = DateFormatter()
+        
+        dateFormatter.timeZone = NSTimeZone(name: city.timezone)! as TimeZone
+        dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+        let placedatetime = dateFormatter.string(from: NSDate() as Date)
+        let start = placedatetime.index(placedatetime.startIndex, offsetBy: 11)
+        let end = placedatetime.index(placedatetime.endIndex, offsetBy: -3)
+        let range = start..<end
+        
+        let substr = placedatetime[range]
+        var time = String(substr)
+        let hourList = time.components(separatedBy: ":")
+        if Int(hourList[0])! < 12{
+            time = time + " AM"
+        }else{
+            time = time + " PM"
+        }
+        return time
+    }
+
     
 }
 

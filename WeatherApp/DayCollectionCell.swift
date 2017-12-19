@@ -7,7 +7,7 @@
 //
 
 import UIKit
-
+//Linked cell for 24 hour display in ViewController.swift
 class DayCollectionCell: UICollectionViewCell {
     
     @IBOutlet weak var hourText: UITextField!

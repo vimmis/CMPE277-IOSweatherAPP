@@ -7,7 +7,7 @@
 //
 
 import UIKit
-
+// Linked cell for next 4 days view in Viewcontroller.swift
 class FourDaysTableViewCell: UITableViewCell {
     @IBOutlet weak var DayText: UITextField!
     @IBOutlet weak var weatherImageId: UIImageView!

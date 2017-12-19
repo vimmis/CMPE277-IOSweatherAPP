@@ -7,13 +7,20 @@
 //
 
 import UIKit
+import CoreLocation
 
-
-class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, UICollectionViewDataSource, UICollectionViewDelegate, UICollectionViewDelegateFlowLayout{
+// This class handles a city's detail view it also performs swipe right and left motions.
+class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, UICollectionViewDataSource, UICollectionViewDelegate, UICollectionViewDelegateFlowLayout, CLLocationManagerDelegate{
     
     let cellSpacingHeight: CGFloat = 5
+    //For location related data
+    static let manager = CLLocationManager()
+    var location: CLLocation?
+    let geocoder = CLGeocoder()
+    static var place: String = ""
+    var placemark: CLPlacemark?
+    
 
-    //let weatherController = WeatherController()
     static var passedValue: String = ""
     var hourData: [[String]] = [] //holds hourly data for 24 hr scrollview
     var weatherDataID: [String] = [] //holds 4days data
@@ -29,9 +36,10 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     @IBOutlet weak var cityMax: UITextField!
     @IBOutlet weak var cityMin: UITextField!
 
+    @IBOutlet weak var locationMsg: UITextField!
     @IBAction func settings(_ sender: UIButton) {
         NSLog("im tapped")
-       // NSLog(weatherController.fetchWeather(cityName))
+        stopLocationManager()
         
     }
 
@@ -39,6 +47,21 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     override func viewDidLoad() {
         today = Cities.jsonToday!
         super.viewDidLoad()
+        //For location
+        let authStatus = CLLocationManager.authorizationStatus()
+        if authStatus == .notDetermined {
+            ViewController.manager.requestWhenInUseAuthorization()
+        }
+        if authStatus == .denied || authStatus == .restricted {
+            let alert = UIAlertController(title: "INFO", message: "Please enable access to Location", preferredStyle: .alert)
+            self.present(alert, animated: true, completion: nil)
+            let time = DispatchTime.now() + 2
+            DispatchQueue.main.asyncAfter(deadline: time){
+                alert.dismiss(animated: true, completion: nil)
+            }
+        }
+        startLocationManager()
+        // Incase of any error, pop up error message
         if CityList.alertmsg != nil{
             let alert = UIAlertController(title: "ERROR", message: CityList.alertmsg, preferredStyle: .alert)
             self.present(alert, animated: true, completion: nil)
@@ -49,8 +72,10 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
             CityList.alertmsg = nil;
             settings(UIButton())
         }
+        // Below function respectively process data and store them for next 4days view and 24 hours view
         explore4days()
         explorehourly()
+        
         NSLog("In controller, value passed: " + ViewController.passedValue)
         
         self.cityName.text = ViewController.passedValue.capitalized
@@ -60,9 +85,17 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
             self.cityMax.text = Cities.getF(today!["main"]["temp_max"].stringValue)
             self.cityMin.text = Cities.getF(today!["main"]["temp_min"].stringValue)
         }else{
-            self.cityMax.text = today!["main"]["temp_max"].stringValue
-            self.cityMin.text = today!["main"]["temp_min"].stringValue
+            self.cityMax.text = String(format: "%.1f", today!["main"]["temp_max"].double!)
+            self.cityMin.text = String(format: "%.1f", today!["main"]["temp_min"].double!)
         }
+        print("PLACE DETECTED : " + ViewController.place)
+        if ViewController.place.capitalized == ViewController.passedValue.capitalized{
+            self.locationMsg.text = "You are here!"
+        }
+        else{
+            self.locationMsg.text = ""
+        }
+        
         let directions: [UISwipeGestureRecognizerDirection] = [.right, .left]
         for direction in directions {
             let gesture = UISwipeGestureRecognizer(target: self, action: #selector(ViewController.handleSwipe(sender:)))
@@ -71,7 +104,6 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         }
         self.automaticallyAdjustsScrollViewInsets = false;
 
-        // Do any additional setup after loading the view, typically from a nib.
     }
     
     
@@ -90,10 +122,9 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
         return cellSpacingHeight
     }
+    // Updates next 4 days each cell based on explore4days() function
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        NSLog("inside table view")
         let cell = tableView.dequeueReusableCell(withIdentifier: "fourdaysCell") as! FourDaysTableViewCell
-        print("Inside each cell of index: \(indexPath.row)")
         cell.DayText.text = fourdayData[indexPath.row][0]
         cell.maxTemp.text = fourdayData[indexPath.row][2]
         cell.minTemp.text = fourdayData[indexPath.row][3]
@@ -110,12 +141,11 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        //Total number of columns shown for 24 hours-3hr interval is 9
+        //Total number of columns shown for 24 hours-3hr interval is 8
         return 8
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        NSLog("inside collection view")
         var cell: DayCollectionCell = collectionView.dequeueReusableCell(withReuseIdentifier: "dayCell", for: indexPath) as! DayCollectionCell
         cell.hourText.text = hourData[indexPath.row][0]
         var urlString = "https://openweathermap.org/img/w/"  + hourData[indexPath.row][1] + ".png"
@@ -135,14 +165,14 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         print("You selected cell #\(indexPath.item)!")
     }
     
-    // Fetch 4 days data starting from timezone's tmorws afternoon
+    // Fetch next 4 days data starting from timezone's tmorws afternoon
     func explore4days(){
         let days =  Cities.jsonHourly
         //Fetch timezone's tmrw Noon date with and without time
         let tmrwnoonDate = Cities.getTmrwNoonToUTCDate(ViewController.passedValue)
         print("Fetched tmrw noon DAte of timezone in UTC: \(tmrwnoonDate)")
         let tmrwnoonDatewithoutTime = Cities.DateWithoutTime(tmrwnoonDate)
-        print("Fetched tmrw noon Date alone of timezone in UTC: \(tmrwnoonDate)")
+        print("Fetched tmrw noon Date alone of timezone in UTC: \(tmrwnoonDatewithoutTime)")
         
         //Fetch HR string from above date and time variable
         let timezoneUTCNoonHR = Cities.StringtoHR(Cities.DatetoString(tmrwnoonDate))
@@ -157,21 +187,19 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
             let str = anItem.1["dt_txt"].string
             let jsonStringToDate = Cities.StringtoDate(str!)
             let jsonStringDatehr = Cities.StringtoHR(str!)
-            
-            if (jsonStringToDate >= tmrwnoonDatewithoutTime && jsonStringDatehr == hrMatchInt && count > 0){
+            let jsonStringToDateTime = Cities.StringtoDateTime(str!)
+            //print("My string to date of json date \(jsonStringToDateTime)")
+            if (jsonStringToDateTime > tmrwnoonDatewithoutTime && jsonStringDatehr == hrMatchInt && count > 0){
                 print(anItem.1["dt_txt"])
                 var storeDataList: [String] = [];
-                let jsonStringToDateTime = Cities.StringtoDateTime(str!)
-                print("My string to date of json date \(jsonStringToDateTime)")
-                
                 let weatherdetail = anItem.1["weather"][0]["icon"].string!
                 print("Weather icon : " + weatherdetail)
                 
                 let tempp = anItem.1["main"].dictionary
-                let min = String(describing: tempp!["temp_min"]!)
+                let min = String(format: "%.1f", tempp!["temp_min"]!.double!)
                 print("Min : " + min)
                 
-                let max = String(describing: tempp!["temp_max"]!)
+                let max = String(format: "%.1f", tempp!["temp_max"]!.double!)
                 print("Max : " + max)
                 
                 let day = dayPrev
@@ -211,8 +239,12 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         var count = 8 //no of for 24 hrs : 9-1: 8
 
         let strfirst = jsonList[0]["dt_txt"].string
-        let jsonStringDatehr = Cities.StringtoHR(strfirst!)
-        if hrMartch < jsonStringDatehr{
+        var jsonStringDatehr = Cities.StringtoHR(strfirst!)
+        if jsonStringDatehr == 0 {
+            jsonStringDatehr = 24
+        }
+        // Checks if the first element returned in weathor json even corresponds to matched UTCHR
+        if hrMartch < jsonStringDatehr {
             print("Im in first if")
             var eachHourData : [String] = []
             eachHourData.append("NOW")
@@ -222,7 +254,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
                 let temp = Cities.getF(Cities.jsonToday!["main"]["temp"].stringValue)
                 eachHourData.append(temp)
             }else{
-                let temp = Cities.jsonToday!["main"]["temp"].stringValue
+                let temp =  String(format: "%.1f", Cities.jsonToday!["main"]["temp"].double!)
                 eachHourData.append(temp)
             }
             hourData.append(eachHourData)
@@ -233,14 +265,15 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
                 let str = anItem.1["dt_txt"].string
                 let jsonStringDatehr = Cities.StringtoHR(str!)
                 var eachHourData : [String] = []
+                // If first weather json data matches to UTCHR and its d first to populate to show "NOW"
                 if count == 8{
-                        print("Im in second if == 9")
+                        print("Im in second if == 8")
                         eachHourData.append("NOW")
                         let weatherdetail = anItem.1["weather"][0]["icon"].string!
                         eachHourData.append(weatherdetail)
                     
                         let tempp = anItem.1["main"].dictionary
-                        let tempAvg = String(describing: tempp!["temp"]!)
+                        let tempAvg = String(format: "%.1f",tempp!["temp"]!.double!)
                         if CityList.temp {
                             eachHourData.append(Cities.getF(tempAvg))
                         }else{
@@ -250,10 +283,11 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
                         count -= 1
                 }
                 else {
+                    //if its not the first json weather data, perform usual processing and appending
                     print("Im in generic loop")
                     localHR = localHR + 3
                     if localHR >= 24 {
-                        localHR = 0
+                        localHR = localHR - 24
                     }
                     var hourStr = ""
                     if localHR < 12 {hourStr = String(localHR) + " AM"}
@@ -265,7 +299,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
                     eachHourData.append(weatherdetail)
                     
                     let tempp = anItem.1["main"].dictionary
-                    let tempAvg = String(describing: tempp!["temp"]!)
+                    let tempAvg = String(format: "%.1f",tempp!["temp"]!.double!)
                     if CityList.temp {
                         eachHourData.append(Cities.getF(tempAvg))
                     }else{
@@ -287,12 +321,13 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
                 
                 print("Swiped right")
                 
-                //change view controllers
+                //Change view controllers based on whatever is next avaiable on citi list (left )
                 
                 let storyBoard : UIStoryboard = UIStoryboard(name: "Main", bundle:nil)
                 
                 let resultViewController = storyBoard.instantiateViewController(withIdentifier: "detailViewStoryBoard") as! ViewController
                 let position = Cities.cities.index(of: ViewController.passedValue)
+                //Checks if its not already the first in city list, if yes, do nothing, if no, fetch previous city data
                 if position != 0{
                     // Load data for next city going to be viewed
                     ViewController.passedValue = Cities.cities[position! - 1]
@@ -320,14 +355,14 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
                 
                 print("Swiped left")
                 
-                //change view controllers
+                //change view controllers based on whatever is next avaiable on citi list (right )
                 
                 let storyBoard : UIStoryboard = UIStoryboard(name: "Main", bundle:nil)
                 
                 let resultViewController = storyBoard.instantiateViewController(withIdentifier: "detailViewStoryBoard") as! ViewController
                 
                 let position = Cities.cities.index(of: ViewController.passedValue)
-
+                //Checks if its not already the last in city list, if yes, do nothing, if no, fetch next city data
                 if position != (Cities.cities.count - 1){
                     // Load data for next city going to be viewed
                     ViewController.passedValue = Cities.cities[position! + 1]
@@ -353,6 +388,60 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
                 
             default:
                 break
+        }
+    }
+    
+    //LOcation related functions
+    
+    func startLocationManager() {
+        if CLLocationManager.locationServicesEnabled() {
+            print("starting location manager")
+            ViewController.manager.delegate = self
+            ViewController.manager.desiredAccuracy = kCLLocationAccuracyKilometer
+            ViewController.manager.startUpdatingLocation()
+        }
+    }
+    
+    func stopLocationManager() {
+        print("Location stopped")
+        ViewController.manager.stopUpdatingLocation()
+        ViewController.manager.delegate = nil
+    }
+    
+    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+        print("Location Manager failed\(error)")
+        stopLocationManager()
+    }
+    
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        print("LOCATIONS!!! \(locations)")
+    
+        let lastLocation = locations.last!
+        
+        if lastLocation.horizontalAccuracy < 0 {
+            return
+        }
+        
+        if location == nil || location!.horizontalAccuracy > lastLocation.horizontalAccuracy {
+            
+            location = lastLocation
+            //To get City  detail for comparison
+            geocoder.reverseGeocodeLocation(lastLocation, completionHandler: { (placemarks, error) in
+                if error == nil, let placemark = placemarks, !placemark.isEmpty {
+                    self.placemark = placemark.last!
+                }
+                
+                if self.location != nil {
+                let placemarktemp = self.placemark
+                if placemarktemp != nil{
+                    if let city = placemarktemp?.locality, !city.isEmpty {
+                            ViewController.place = city
+                            self.view.setNeedsDisplay()
+                        }
+                    }
+                }
+                
+            })
         }
     }
     

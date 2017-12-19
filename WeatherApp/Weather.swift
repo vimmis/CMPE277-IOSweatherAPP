@@ -8,7 +8,7 @@
 
 import Foundation
 
-// To store a city weather and location data.
+// Model to store a city weather and location data.
 struct City {
     var placeName: String = ""
     var lat: String = ""

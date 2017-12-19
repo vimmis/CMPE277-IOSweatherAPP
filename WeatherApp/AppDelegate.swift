@@ -18,7 +18,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
-        
+        // this section we use to load cities added in app (if any) and populate related model objects with its data.
         GMSPlacesClient.provideAPIKey("AIzaSyBoDQtDBiYoOzFI-S1aowHU89xNFibj_bc")
         GMSServices.provideAPIKey("AIzaSyBoDQtDBiYoOzFI-S1aowHU89xNFibj_bc")
         print("In delegate")
@@ -30,7 +30,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         let fileManager = FileManager.default
         if fileManager.fileExists(atPath: filePath) {
             print("FILE AVAILABLE")
-            let file = "cities.txt" //this is the file. we will write to and read from it
+            let file = "cities.txt" //this is the file we will write to and read from it
             
             if let dir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
                 var citiesList : [String] = []
@@ -76,6 +76,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func applicationDidEnterBackground(_ application: UIApplication) {
         // Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later.
         // If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
+        // In this section, we save the cities data added in app to a file, so that can be reloaded wen it is launched back.
         let path = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0] as String
         print("INSIDE BACKGROUND path" + path)
         let url = URL(fileURLWithPath: path)
