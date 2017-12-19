@@ -19,7 +19,7 @@ class CityList: UIViewController , UITableViewDelegate, UITableViewDataSource{
     var cityMax : String = ""
     var cityMin : String = ""
     //static var segmentControll : UISegmentedControl? = nil
-    
+    static var alertmsg : String? = nil
     @IBOutlet weak var segmentControll: UISegmentedControl!
     @IBOutlet weak var tableView: UITableView!
     
@@ -42,7 +42,10 @@ class CityList: UIViewController , UITableViewDelegate, UITableViewDataSource{
     }
     
     override func viewDidLoad() {
+        
         super.viewDidLoad()
+        print("inside viewdownload")
+        
         // Sustain segmented stemperature selections.
         if CityList.temp{
             segmentControll.selectedSegmentIndex = 1
@@ -53,6 +56,21 @@ class CityList: UIViewController , UITableViewDelegate, UITableViewDataSource{
         // Do any additional setup after loading the view.
     }
 
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        if CityList.alertmsg != nil{
+            let alert = UIAlertController(title: "ERROR", message: CityList.alertmsg, preferredStyle: .alert)
+            self.present(alert, animated: true, completion: nil)
+            let time = DispatchTime.now() + 2
+            DispatchQueue.main.asyncAfter(deadline: time){
+                alert.dismiss(animated: true, completion: nil)
+            }
+            CityList.alertmsg = nil;
+        }
+        
+        
+    }
+    
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
@@ -177,21 +195,41 @@ extension CityList: GMSAutocompleteViewControllerDelegate {
             
             Cities.getTimezone(String(format:"%f", lat),String(format:"%f", lon), place.name)
             sleep(1)
+            if CityList.alertmsg != nil{
+                print("Timezone exception caught")
+                print(Cities.cities)
+                Cities.cities.removeLast()
+                print(Cities.cities)
+                dismiss(animated: true, completion: nil)
+                tableView.reloadData()
+            }
             let city = Cities.cityObjectsMap[place.name]
             print("Selected city object : \(String(describing: city))")
             Cities.getToday((city?.lat)!,(city?.lon)!)
-            while (Cities.jsonToday == nil){
+            while (Cities.jsonToday == nil && CityList.alertmsg == nil){
                 //do nothing
             }
+            if CityList.alertmsg != nil{
+                print("Weather API Today exception caught")
+                print(Cities.cities)
+                Cities.cities.removeLast()
+                print(Cities.cities)
+                dismiss(animated: true, completion: nil)
+                tableView.reloadData()
+            }
             Cities.getHourly((city?.lat)!,(city?.lon)!)
-            while (Cities.jsonHourly == nil){
+            while (Cities.jsonHourly == nil && CityList.alertmsg == nil){
                 //do nothing
             }
             // Load data for next city going to be viewed
             dismiss(animated: true, completion: nil)
             tableView.reloadData()
         }else{
-            CityList.toastView(messsage:"City already exist", view: self.view)
+            //CityList.toastView(messsage:"City already exist", view: self.view)
+            print ("Duplicate city")
+            CityList.alertmsg = "City already exist, not adding"
+            dismiss(animated: true, completion: nil)
+            tableView.reloadData()
         }
         
     }
